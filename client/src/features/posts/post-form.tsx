@@ -17,7 +17,11 @@ import type { PostFormType } from "@/services/validation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPost } from "@/services/api/posts-service";
 
-export function CreatePostForm() {
+type PostFormProps = {
+  closeDialog: () => void;
+};
+
+export default function PostForm({ closeDialog }: PostFormProps) {
   const form = useForm<PostFormType>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
@@ -36,14 +40,12 @@ export function CreatePostForm() {
 
   function onSubmit(data: PostFormType) {
     mutate(data);
+    closeDialog();
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full lg:w-1/2 space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
         <FormField
           control={form.control}
           name="username"
@@ -79,7 +81,7 @@ export function CreatePostForm() {
               <FormControl>
                 <Textarea
                   placeholder="Write something..."
-                  className="resize-none"
+                  className="resize-none h-24"
                   {...field}
                 />
               </FormControl>

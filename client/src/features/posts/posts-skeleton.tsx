@@ -5,6 +5,9 @@ export function PostsSkeleton() {
     <>
       <PostSkeleton />
       <PostSkeleton />
+      <PostSkeleton />
+      <PostSkeleton />
+      <PostSkeleton />
     </>
   );
 }

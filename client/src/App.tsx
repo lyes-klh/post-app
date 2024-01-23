@@ -9,8 +9,8 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <div className="min-h-dvh lg:container mx-auto px-0 dark:text-slate-50">
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <div className="min-h-dvh lg:container mx-auto px-0 dark:text-gray-50">
           <NavBar />
           <Home />
         </div>
