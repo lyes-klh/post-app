@@ -92,7 +92,7 @@ export function CreatePostForm() {
           Submit
         </Button>
       </form>
-      {isError && <p>{error.message}</p>}
+      {isError && <p className="text-red-600">{error.message}</p>}
     </Form>
   );
 }

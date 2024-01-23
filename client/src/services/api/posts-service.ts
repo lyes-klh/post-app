@@ -3,12 +3,19 @@ import { PostSchema } from "@/services/validation";
 import type { PostType, PostFormType } from "@/services/validation";
 import type { ApiResponse } from "./api-types";
 
-export const getPosts = async (): Promise<PostType[]> => {
+export const getPosts = async ({
+  pageParam,
+}: {
+  pageParam: number;
+}): Promise<PostType[]> => {
   try {
-    const response = await fetch(`${apiConfig.baseUrl}/posts`, {
-      method: "GET",
-      headers: apiConfig.headers,
-    });
+    const response = await fetch(
+      `${apiConfig.baseUrl}/posts?page=${pageParam}`,
+      {
+        method: "GET",
+        headers: apiConfig.headers,
+      }
+    );
 
     const data: ApiResponse<PostType[]> = await response.json();
     return PostSchema.array().parse(data.data);
