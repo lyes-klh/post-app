@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { ReloadIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { PostSchema } from "@/services/validation";
+import { PostFormSchema } from "@/services/validation";
 import type { PostFormType } from "@/services/validation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createPost } from "@/services/api/posts-service";
 
 export function CreatePostForm() {
   const form = useForm<PostFormType>({
-    resolver: zodResolver(PostSchema),
+    resolver: zodResolver(PostFormSchema),
     defaultValues: {
       username: "",
       title: "",
@@ -25,8 +27,15 @@ export function CreatePostForm() {
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: createPost,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
   function onSubmit(data: PostFormType) {
-    console.log(data);
+    mutate(data);
   }
 
   return (
@@ -78,10 +87,12 @@ export function CreatePostForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
           Submit
         </Button>
       </form>
+      {isError && <p>{error.message}</p>}
     </Form>
   );
 }

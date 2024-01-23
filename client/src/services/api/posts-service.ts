@@ -1,6 +1,6 @@
 import { apiConfig } from "./api-config";
 import { PostSchema } from "@/services/validation";
-import type { PostType } from "@/services/validation";
+import type { PostType, PostFormType } from "@/services/validation";
 import type { ApiResponse } from "./api-types";
 
 export const getPosts = async (): Promise<PostType[]> => {
@@ -17,7 +17,7 @@ export const getPosts = async (): Promise<PostType[]> => {
   }
 };
 
-export const createPost = async (post: PostType): Promise<PostType> => {
+export const createPost = async (post: PostFormType): Promise<PostType> => {
   try {
     const response = await fetch(`${apiConfig.baseUrl}/posts`, {
       method: "POST",

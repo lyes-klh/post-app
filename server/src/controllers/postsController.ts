@@ -8,7 +8,7 @@ export const getAllPosts = async (
   next: NextFunction
 ) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.status(200).json({
       message: "success",
       data: posts,

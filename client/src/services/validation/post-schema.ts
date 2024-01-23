@@ -18,5 +18,7 @@ export const PostSchema = z.object({
     }),
 });
 
+export const PostFormSchema = PostSchema.omit({ _id: true });
+
 export type PostType = z.infer<typeof PostSchema>;
-export type PostFormType = Omit<PostType, "_id">;
+export type PostFormType = z.infer<typeof PostFormSchema>;
