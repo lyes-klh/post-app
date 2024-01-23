@@ -6,7 +6,7 @@ export default function NavBar() {
     <nav className="h-12 p-4 flex justify-between items-center border-b border-slate-800">
       <div className="flex items-center gap-2">
         <Pencil />
-        <span className="text-xl">BlogApp</span>
+        <span className="text-xl font-bold">PostsApp</span>
       </div>
       <ModeToggle />
     </nav>

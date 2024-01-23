@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,28 +11,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "./ui/input";
-
-const FormSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 charecters",
-  }),
-  title: z.string().min(3, {
-    message: "Title must be at least 3 charecters",
-  }),
-  content: z
-    .string()
-    .min(10, {
-      message: "Content must be at least 10 characters.",
-    })
-    .max(300, {
-      message: "Content must not be longer than 30 characters.",
-    }),
-});
+import { Input } from "@/components/ui/input";
+import { PostSchema } from "@/services/validation";
+import type { PostFormType } from "@/services/validation";
 
 export function CreatePostForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<PostFormType>({
+    resolver: zodResolver(PostSchema),
     defaultValues: {
       username: "",
       title: "",
@@ -41,7 +25,7 @@ export function CreatePostForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(data: PostFormType) {
     console.log(data);
   }
 

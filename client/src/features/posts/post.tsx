@@ -6,14 +6,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { PostType } from "@/services/validation";
 
 type PostProps = {
-  username: string;
-  title: string;
-  content: string;
+  post: PostType;
 };
 
-export default function Post({ username, title, content }: PostProps) {
+export default function Post({
+  post: { username, title, content },
+}: PostProps) {
   return (
     <Card className="mt-4 w-full lg:w-2/3">
       <CardHeader>

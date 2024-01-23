@@ -1,27 +1,22 @@
-import { CreatePostForm } from "@/components/create-form";
 import { ThemeProvider } from "@/components/theme-provider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import NavBar from "./components/navbar";
-import Post from "./components/post";
-import PostSkeleton from "./components/post-skeleton";
+import Home from "./pages/home";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className="min-h-dvh lg:container mx-auto px-0">
-        <NavBar />
-        <main className="px-3 lg:px-12 py-2 flex flex-col items-center">
-          <CreatePostForm />
-          <Post
-            username="Lyes Kellouche"
-            title="Hello World"
-            content="
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Illo, consequuntur eum aliquid sapiente iusto quam culpa expedita neque rerum dolor nostrum consequatur minus dignissimos aut quisquam non at animi tempora. Similique, ad. Molestiae at, odio earum dolore voluptate iste ullam!"
-          />
-
-          <PostSkeleton />
-        </main>
-      </div>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <div className="min-h-dvh lg:container mx-auto px-0 dark:text-slate-50">
+          <NavBar />
+          <Home />
+        </div>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
