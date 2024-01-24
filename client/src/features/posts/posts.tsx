@@ -1,5 +1,5 @@
 import Post from "./post";
-import type { PostType } from "@/services/validation";
+import type { Post as PostType } from "@/services/validation";
 
 type PostsProps = {
   posts: PostType[];

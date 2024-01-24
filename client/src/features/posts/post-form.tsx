@@ -13,35 +13,55 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { PostFormSchema } from "@/services/validation";
-import type { PostFormType } from "@/services/validation";
+import type { PostForm, Post } from "@/services/validation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPost } from "@/services/api/posts-service";
+import { createPost, updatePost } from "@/services/api/posts-service";
 
-type PostFormProps = {
-  closeDialog: () => void;
-};
+type PostFormProps =
+  | {
+      mode: "create";
+      postValues?: never;
+      closeDialog: () => void;
+    }
+  | {
+      mode: "edit";
+      postValues: Post;
+      closeDialog: () => void;
+    };
 
-export default function PostForm({ closeDialog }: PostFormProps) {
-  const form = useForm<PostFormType>({
+export default function PostForm({ mode, closeDialog, postValues }: PostFormProps) {
+  const form = useForm<PostForm>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
-      username: "",
-      title: "",
-      content: "",
+      username: postValues?.username || "",
+      title: postValues?.title || "",
+      content: postValues?.content || "",
     },
   });
 
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, isError, error } = useMutation({
+  const createMutation = useMutation({
     mutationFn: createPost,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
   });
 
-  function onSubmit(data: PostFormType) {
-    mutate(data);
+  const updateMutation = useMutation({
+    mutationFn: ({ id, post }: { id: string; post: Partial<PostForm> }) => updatePost(id, post),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
+  const { isPending, isError, error } = mode === "create" ? createMutation : updateMutation;
+
+  const onSubmit = async (postData: PostForm) => {
+    if (mode === "create") await createMutation.mutateAsync(postData);
+    if (mode === "edit")
+      await updateMutation.mutateAsync({
+        id: postValues._id,
+        post: postData,
+      });
     closeDialog();
-  }
+  };
 
   return (
     <Form {...form}>

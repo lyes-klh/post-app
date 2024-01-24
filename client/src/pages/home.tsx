@@ -6,23 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function Home() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isPending,
-    isFetchingNextPage,
-    isError,
-    error,
-  } = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: getPosts,
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _, lastPageParam) => {
-      if (lastPage.length > 0) return lastPageParam + 1;
-      return undefined;
-    },
-  });
+  const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage, isError, error } =
+    useInfiniteQuery({
+      queryKey: ["posts"],
+      queryFn: getPosts,
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, _, lastPageParam) => {
+        if (lastPage.length > 0) return lastPageParam + 1;
+        return undefined;
+      },
+    });
 
   return (
     <main className="px-3 lg:px-12 py-2 flex flex-col items-center">
@@ -43,9 +36,7 @@ export default function Home() {
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage || !hasNextPage}
           >
-            {isFetchingNextPage && (
-              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {isFetchingNextPage && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
             Load More
           </Button>
         </>
