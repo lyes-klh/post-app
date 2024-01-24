@@ -1,0 +1,16 @@
+{
+  "name": "post-app",
+  "version": "1.0.0",
+  "description": "Mini app for writing posts.",
+  "scripts": {
+    "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
+    "start-client": "cd client && npm run dev",
+    "start-server": "cd server && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
