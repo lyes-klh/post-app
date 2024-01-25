@@ -28,6 +28,7 @@ export function PostDialog({ mode, postValues }: PostDialogProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
+          className={mode === "edit" ? "hover:text-primary" : ""}
           variant={mode === "create" ? "default" : "ghost"}
           size={mode === "create" ? "default" : "icon"}
         >
@@ -41,7 +42,7 @@ export function PostDialog({ mode, postValues }: PostDialogProps) {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] dark:text-slate-50 dark:bg-gray-950">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Create Post" : "Edit Post"}</DialogTitle>
           <DialogDescription>

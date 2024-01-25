@@ -39,7 +39,7 @@ export function DeletePostDialog({ id }: DeletePostDialogProps) {
           <TrashIcon className="h-5 w-5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="sm:max-w-[425px] dark:text-slate-50 dark:bg-gray-950">
+      <AlertDialogContent className="sm:max-w-[425px]">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Post</AlertDialogTitle>
           <AlertDialogDescription>

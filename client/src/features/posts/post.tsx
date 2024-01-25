@@ -29,7 +29,7 @@ export default function Post({ post }: PostProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4 p-4 bg-white dark:bg-slate-950 dark:border-[1px] dark:border-slate-800 rounded-lg shadow-md mt-4 w-full lg:w-2/3">
+    <div className="flex flex-col gap-4 p-4 rounded-lg shadow-md mt-4 w-full lg:w-2/3">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Avatar>
@@ -55,7 +55,7 @@ export default function Post({ post }: PostProps) {
               <Content content={content} />
             </CollapsibleContent>
             <CollapsibleTrigger asChild>
-              <Button className="text-slate-400" size="sm" variant="ghost">
+              <Button size="sm" variant="link" className="text-primary">
                 Show {isOpen ? "less" : "more"}
               </Button>
             </CollapsibleTrigger>

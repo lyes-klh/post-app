@@ -10,7 +10,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <div className="min-h-dvh lg:container mx-auto px-0 dark:text-gray-50">
+        <div className="min-h-dvh lg:container mx-auto px-0">
           <NavBar />
           <Home />
         </div>
