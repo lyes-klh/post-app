@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Post from "../models/postModel";
-import { PostSchema, PostType } from "../lib/validators/PostValidator";
-import { QueryParamsSchema, PathParamsSchema } from "../lib/validators/ParamsValidators";
+import { PostFormSchema } from "@post-app/validation";
+import { QueryParamsSchema, PathParamsSchema } from "../lib/validation/ParamsValidators";
 import { ZodError } from "zod";
 
 export const getAllPosts = async (req: Request, res: Response) => {
@@ -33,7 +33,7 @@ export const getAllPosts = async (req: Request, res: Response) => {
 
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const postParsed = PostSchema.parse(req.body);
+    const postParsed = PostFormSchema.parse(req.body);
     const post = await Post.create(postParsed);
 
     res.status(201).json({
@@ -53,7 +53,7 @@ export const createPost = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   try {
     const pathParams = PathParamsSchema.parse(req.params);
-    const postParsed = PostSchema.partial()
+    const postParsed = PostFormSchema.partial()
       .refine((data) => Object.keys(data).length > 0, {
         message: "Post must have at least one attribute",
       })

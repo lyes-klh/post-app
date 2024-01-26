@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { PostFormSchema } from "@/services/validation";
-import type { PostForm, Post } from "@/services/validation";
+import { PostFormSchema } from "@post-app/validation";
+import type { PostFormType, PostType } from "@post-app/validation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPost, updatePost } from "@/services/api/posts-service";
 
@@ -25,12 +25,12 @@ type PostFormProps =
     }
   | {
       mode: "edit";
-      postValues: Post;
+      postValues: PostType;
       closeDialog: () => void;
     };
 
 export default function PostForm({ mode, closeDialog, postValues }: PostFormProps) {
-  const form = useForm<PostForm>({
+  const form = useForm<PostFormType>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
       username: postValues?.username || "",
@@ -47,13 +47,13 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, post }: { id: string; post: Partial<PostForm> }) => updatePost(id, post),
+    mutationFn: ({ id, post }: { id: string; post: Partial<PostFormType> }) => updatePost(id, post),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
   });
 
   const { isPending, isError, error } = mode === "create" ? createMutation : updateMutation;
 
-  const onSubmit = async (postData: PostForm) => {
+  const onSubmit = async (postData: PostFormType) => {
     if (mode === "create") await createMutation.mutateAsync(postData);
     if (mode === "edit")
       await updateMutation.mutateAsync({

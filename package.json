@@ -2,15 +2,21 @@
   "name": "post-app",
   "version": "1.0.0",
   "description": "Mini app for writing posts.",
+  "private": true,
+  "workspaces": [
+    "docs",
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
-    "start-client": "cd client && npm run dev",
-    "start-server": "cd server && npm run dev"
+    "dev": "dotenv -- turbo run dev",
+    "build": "dotenv -- turbo run build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lyes Kellouche",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "dotenv-cli": "^7.3.0",
+    "turbo": "^1.11.3"
   }
 }

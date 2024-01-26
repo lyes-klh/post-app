@@ -10,7 +10,7 @@ import {
 import PostForm from "@/features/posts/post-form";
 import { useState } from "react";
 import { PlusIcon, Pencil2Icon } from "@radix-ui/react-icons";
-import { Post } from "@/services/validation";
+import { PostType } from "@post-app/validation";
 
 type PostDialogProps =
   | {
@@ -19,7 +19,7 @@ type PostDialogProps =
     }
   | {
       mode: "edit";
-      postValues: Post;
+      postValues: PostType;
     };
 
 export function PostDialog({ mode, postValues }: PostDialogProps) {

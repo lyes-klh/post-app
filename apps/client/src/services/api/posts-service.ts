@@ -1,9 +1,9 @@
 import { apiConfig } from "./api-config";
-import { PostSchema } from "@/services/validation";
-import type { Post, PostForm } from "@/services/validation";
+import { PostSchema } from "@post-app/validation";
+import type { PostType, PostFormType } from "@post-app/validation";
 import type { ApiResponse, ErrorResponse } from "./api-types";
 
-export const getPosts = async ({ pageParam }: { pageParam: number }): Promise<Post[]> => {
+export const getPosts = async ({ pageParam }: { pageParam: number }): Promise<PostType[]> => {
   const response = await fetch(`${apiConfig.baseUrl}/posts?page=${pageParam}`, {
     method: "GET",
     headers: apiConfig.headers,
@@ -14,11 +14,11 @@ export const getPosts = async ({ pageParam }: { pageParam: number }): Promise<Po
     throw new Error(error.message);
   }
 
-  const data: ApiResponse<Post[]> = await response.json();
+  const data: ApiResponse<PostType[]> = await response.json();
   return PostSchema.array().parse(data.data);
 };
 
-export const createPost = async (post: PostForm): Promise<Post> => {
+export const createPost = async (post: PostFormType): Promise<PostType> => {
   const response = await fetch(`${apiConfig.baseUrl}/posts`, {
     method: "POST",
     headers: apiConfig.headers,
@@ -30,11 +30,11 @@ export const createPost = async (post: PostForm): Promise<Post> => {
     throw new Error(error.message);
   }
 
-  const data: ApiResponse<Post> = await response.json();
+  const data: ApiResponse<PostType> = await response.json();
   return PostSchema.parse(data.data);
 };
 
-export const updatePost = async (id: string, post: Partial<PostForm>): Promise<Post> => {
+export const updatePost = async (id: string, post: Partial<PostFormType>): Promise<PostType> => {
   const response = await fetch(`${apiConfig.baseUrl}/posts/${id}`, {
     method: "PATCH",
     headers: apiConfig.headers,
@@ -46,7 +46,7 @@ export const updatePost = async (id: string, post: Partial<PostForm>): Promise<P
     throw Error(error.message);
   }
 
-  const data: ApiResponse<Post> = await response.json();
+  const data: ApiResponse<PostType> = await response.json();
   return PostSchema.parse(data.data);
 };
 

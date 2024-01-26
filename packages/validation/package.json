@@ -1,0 +1,16 @@
+{
+  "name": "@post-app/validation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Lyes Kellouche",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^8.0.1"
+  }
+}

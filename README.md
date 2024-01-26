@@ -6,36 +6,40 @@ Mini app for writing posts.
 
 ##### Light mode
 
-<img src="images/1.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/1.jpeg" alt="Screenshot 1" width="600" >
 <br>
-<img src="images/2.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/2.jpeg" alt="Screenshot 1" width="600" >
 <br>
-<img src="images/3.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/3.jpeg" alt="Screenshot 1" width="600" >
 
 ##### Dark mode
 
-<img src="images/4.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/4.jpeg" alt="Screenshot 1" width="600" >
 <br>
-<img src="images/5.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/5.jpeg" alt="Screenshot 1" width="600" >
 <br>
-<img src="images/6.jpeg" alt="Screenshot 1" width="600" >
+<img src="docs/images/6.jpeg" alt="Screenshot 1" width="600" >
 
 ##### Mobile
 
-<img src="images/7.jpeg" alt="Screenshot 1" height="400" >
+<img src="docs/images/7.jpeg" alt="Screenshot 1" height="400" >
 <br>
-<img src="images/8.jpeg" alt="Screenshot 1" height="400" >
+<img src="docs/images/8.jpeg" alt="Screenshot 1" height="400" >
 
-#### Technologies used :
+#### Tech Stack :
 
-- TypeScript
-- React
-- shadcn-ui
-- React Hook Form
-- Zod
-- Tailwind
-- TanStack Query
-- Node
-- Express
-- MongoDB
-- Mongoose
+The tools used for this project are probably overkill, but I used them anyway for learning purposes.
+
+The project is organized as a monorepo using [turborepo](https://turbo.build/repo/docs/handbook) and [npm workspace](https://docs.npmjs.com/cli/v8/using-npm/workspaces).
+
+- TypeScript.
+- React.
+- shadcn-ui.
+- React Hook Form.
+- Zod.
+- Tailwind.
+- TanStack Query.
+- Node.
+- Express.
+- MongoDB.
+- Mongoose.

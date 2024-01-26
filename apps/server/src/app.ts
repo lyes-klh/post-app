@@ -2,8 +2,11 @@ import express from "express";
 import postsRouter from "./routes/postsRouter";
 import helmet from "helmet";
 import cors from "cors";
+import morgan from "morgan";
 
 const app = express();
+
+if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
 app.use(helmet());
 const corsOptions = {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { PostType } from "../lib/validators/PostValidator";
+import { PostType } from "../lib/validation/PostValidator";
 
 const postSchema = new mongoose.Schema<PostType>(
   {
