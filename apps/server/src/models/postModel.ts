@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { PostType } from "../lib/validation/PostValidator";
+import mongoose from 'mongoose';
+import { PostType } from '@post-app/validation';
 
 const postSchema = new mongoose.Schema<PostType>(
   {
@@ -15,10 +15,15 @@ const postSchema = new mongoose.Schema<PostType>(
       type: String,
       required: true,
     },
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    comments: { type: [String], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const PostModel = mongoose.model<PostType>("Post", postSchema);
+const PostModel = mongoose.model<PostType>('Post', postSchema);
 
 export default PostModel;

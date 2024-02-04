@@ -1,9 +1,10 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { PostType } from "@post-app/validation";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { PostDialog, DeletePostDialog } from "./";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { PostType } from '@post-app/validation';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { PostDialog, DeletePostDialog } from './';
+import Feedback from './feedback';
 
 type PostProps = {
   post: PostType;
@@ -13,7 +14,7 @@ const MAX_LENGTH = 400;
 
 const truncateString = (str: string, maxLength: number = MAX_LENGTH): string => {
   if (str.length > maxLength) {
-    return str.substring(0, maxLength) + "...";
+    return str.substring(0, maxLength) + '...';
   }
   return str;
 };
@@ -29,8 +30,8 @@ export default function Post({ post }: PostProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-lg shadow-md mt-4 w-full lg:w-2/3">
-      <div className="flex justify-between items-center">
+    <div className="mt-4 flex w-full flex-col gap-4 rounded-lg p-4 shadow-md lg:w-2/3">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Avatar>
             <AvatarImage src="" />
@@ -56,12 +57,14 @@ export default function Post({ post }: PostProps) {
             </CollapsibleContent>
             <CollapsibleTrigger asChild>
               <Button size="sm" variant="link" className="text-primary">
-                Show {isOpen ? "less" : "more"}
+                Show {isOpen ? 'less' : 'more'}
               </Button>
             </CollapsibleTrigger>
           </Collapsible>
         )}
       </>
+
+      <Feedback likesCount={post.likesCount} commentsCount={post.comments.length} id={post._id} />
     </div>
   );
 }

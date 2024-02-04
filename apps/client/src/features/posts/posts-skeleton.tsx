@@ -1,4 +1,4 @@
-import PostSkeleton from "./post-skeleton";
+import PostSkeleton from './post-skeleton';
 
 export function PostsSkeleton() {
   return (

@@ -9,8 +9,5 @@
   "type": "module",
   "keywords": [],
   "author": "Lyes Kellouche",
-  "license": "ISC",
-  "devDependencies": {
-    "tsup": "^8.0.1"
-  }
+  "license": "ISC"
 }

@@ -1,7 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { ReloadIcon } from '@radix-ui/react-icons';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,22 +9,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { PostFormSchema } from "@post-app/validation";
-import type { PostFormType, PostType } from "@post-app/validation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPost, updatePost } from "@/services/api/posts-service";
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { PostFormSchema } from '@post-app/validation';
+import type { PostFormType, PostType } from '@post-app/validation';
+import { trpc } from '@/lib/trpc';
 
 type PostFormProps =
   | {
-      mode: "create";
+      mode: 'create';
       postValues?: never;
       closeDialog: () => void;
     }
   | {
-      mode: "edit";
+      mode: 'edit';
       postValues: PostType;
       closeDialog: () => void;
     };
@@ -33,29 +32,27 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
   const form = useForm<PostFormType>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
-      username: postValues?.username || "",
-      title: postValues?.title || "",
-      content: postValues?.content || "",
+      username: postValues?.username || '',
+      title: postValues?.title || '',
+      content: postValues?.content || '',
     },
   });
 
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
 
-  const createMutation = useMutation({
-    mutationFn: createPost,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  const createMutation = trpc.posts.create.useMutation({
+    onSuccess: () => utils.posts.getAll.invalidate(),
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, post }: { id: string; post: Partial<PostFormType> }) => updatePost(id, post),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  const updateMutation = trpc.posts.update.useMutation({
+    onSuccess: () => utils.posts.getAll.invalidate(),
   });
 
-  const { isPending, isError, error } = mode === "create" ? createMutation : updateMutation;
+  const { isPending, isError, error } = mode === 'create' ? createMutation : updateMutation;
 
   const onSubmit = async (postData: PostFormType) => {
-    if (mode === "create") await createMutation.mutateAsync(postData);
-    if (mode === "edit")
+    if (mode === 'create') await createMutation.mutateAsync(postData);
+    if (mode === 'edit')
       await updateMutation.mutateAsync({
         id: postValues._id,
         post: postData,
@@ -101,7 +98,7 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
               <FormControl>
                 <Textarea
                   placeholder="Write something..."
-                  className="resize-none h-24"
+                  className="h-24 resize-none"
                   {...field}
                 />
               </FormControl>
@@ -114,7 +111,11 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
           Submit
         </Button>
       </form>
-      {isError && <p className="text-red-600">{error.message}</p>}
+      {isError && (
+        <p className="text-red-600">
+          {error.data?.code} {error.message}
+        </p>
+      )}
     </Form>
   );
 }

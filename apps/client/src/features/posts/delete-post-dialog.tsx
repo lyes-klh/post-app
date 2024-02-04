@@ -7,12 +7,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { deletePost } from "@/services/api/posts-service";
-import { ReloadIcon, TrashIcon } from "@radix-ui/react-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { trpc } from '@/lib/trpc';
+import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons';
+import { useState } from 'react';
 
 type DeletePostDialogProps = {
   id: string;
@@ -20,22 +19,25 @@ type DeletePostDialogProps = {
 
 export function DeletePostDialog({ id }: DeletePostDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
 
-  const { mutateAsync, isPending, isError, error } = useMutation({
-    mutationFn: deletePost,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  const { mutateAsync, isPending, isError, error } = trpc.posts.delete.useMutation({
+    onSuccess: () => utils.posts.invalidate(),
   });
 
   const handleClick = async () => {
-    await mutateAsync(id);
+    await mutateAsync({ id });
     setIsOpen(false);
   };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="hover:text-red-600 dark:hover:text-red-600">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:text-destructive dark:hover:text-destructive"
+        >
           <TrashIcon className="h-5 w-5" />
         </Button>
       </AlertDialogTrigger>
@@ -44,13 +46,17 @@ export function DeletePostDialog({ id }: DeletePostDialogProps) {
           <AlertDialogTitle>Delete Post</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the post.
-            {isError && <p className="text-red-600">{error.message}</p>}
+            {isError && (
+              <p className="text-destructive">
+                {error.data?.code} {error.message}
+              </p>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button
-            className="bg-red-600 dark:bg-red-600 hover:bg-red-500 dark:hover:bg-red-500"
+            className="bg-destructive text-destructive-foreground hover:bg-red-400"
             onClick={handleClick}
             disabled={isPending}
           >

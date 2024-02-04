@@ -1,24 +1,24 @@
-import React from "react";
-import { Posts, PostsSkeleton } from "@/features/posts";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getPosts } from "@/services/api/posts-service";
-import { Button } from "@/components/ui/button";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import React from 'react';
+import { Posts, PostsSkeleton } from '@/features/posts';
+import { Button } from '@/components/ui/button';
+import { ReloadIcon } from '@radix-ui/react-icons';
+import { trpc } from '@/lib/trpc';
 
 export default function Home() {
   const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage, isError, error } =
-    useInfiniteQuery({
-      queryKey: ["posts"],
-      queryFn: getPosts,
-      initialPageParam: 1,
-      getNextPageParam: (lastPage, _, lastPageParam) => {
-        if (lastPage.length > 0) return lastPageParam + 1;
-        return undefined;
+    trpc.posts.getAll.useInfiniteQuery(
+      {},
+      {
+        initialCursor: 1,
+        getNextPageParam: (lastPage, _, lastPageParam) => {
+          if (lastPage.length > 0) return lastPageParam + 1;
+          return undefined;
+        },
       },
-    });
+    );
 
   return (
-    <main className="px-3 lg:px-12 py-2 flex flex-col items-center">
+    <main className="flex flex-col items-center px-3 py-2 lg:px-12">
       {isPending ? (
         <PostsSkeleton />
       ) : isError ? (
