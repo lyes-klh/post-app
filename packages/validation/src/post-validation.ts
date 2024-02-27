@@ -22,5 +22,5 @@ export const PostSchema = z.object({
 
 export const PostFormSchema = PostSchema.omit({ _id: true, likesCount: true, comments: true });
 
-export type PostType = z.infer<typeof PostSchema>;
-export type PostFormType = z.infer<typeof PostFormSchema>;
+export type TPost = z.infer<typeof PostSchema>;
+export type TPostForm = z.infer<typeof PostFormSchema>;

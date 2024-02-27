@@ -1,8 +1,8 @@
 import Post from '@/models/postModel';
-import { router, publicProcedure } from '../trpc';
+import { router, publicProcedure, protectedProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { PostFormSchema, PostType } from '@post-app/validation';
+import { PostFormSchema, TPost } from '@post-app/validation';
 
 export const postRouter = router({
   getById: publicProcedure
@@ -19,10 +19,10 @@ export const postRouter = router({
           message: 'Post not found',
         });
 
-      return post as PostType;
+      return post as TPost;
     }),
 
-  getAll: publicProcedure
+  getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).nullish(),
@@ -38,13 +38,13 @@ export const postRouter = router({
         .skip((cursor - 1) * limit)
         .limit(limit);
 
-      return posts as PostType[];
+      return posts as TPost[];
     }),
 
   create: publicProcedure.input(PostFormSchema).mutation(async ({ input }) => {
     const post = await Post.create(input);
 
-    return post as PostType;
+    return post as TPost;
   }),
 
   update: publicProcedure
@@ -56,7 +56,7 @@ export const postRouter = router({
     )
     .mutation(async ({ input }) => {
       const post = await Post.findByIdAndUpdate(input.id, input.post, { new: true });
-      return post as PostType;
+      return post as TPost;
     }),
 
   delete: publicProcedure
@@ -96,7 +96,7 @@ export const postRouter = router({
 
       const updatedPost = await post.save();
 
-      return updatedPost as PostType;
+      return updatedPost as TPost;
     }),
 
   comment: publicProcedure
@@ -114,6 +114,6 @@ export const postRouter = router({
 
       const updatedPost = await post.save();
 
-      return updatedPost as PostType;
+      return updatedPost as TPost;
     }),
 });

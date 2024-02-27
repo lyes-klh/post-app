@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import { PostType } from '@post-app/validation';
+import { TPost } from '@post-app/validation';
 
-const postSchema = new mongoose.Schema<PostType>(
+const postSchema = new mongoose.Schema<TPost>(
   {
     username: {
       type: String,
@@ -24,6 +24,6 @@ const postSchema = new mongoose.Schema<PostType>(
   { timestamps: true },
 );
 
-const PostModel = mongoose.model<PostType>('Post', postSchema);
+const PostModel = mongoose.model<TPost>('Post', postSchema);
 
 export default PostModel;

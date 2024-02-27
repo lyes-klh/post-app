@@ -1,8 +1,8 @@
 import Post from './post';
-import type { PostType } from '@post-app/validation';
+import type { TPost } from '@post-app/validation';
 
 type PostsProps = {
-  posts: PostType[];
+  posts: TPost[];
 };
 
 export function Posts({ posts }: PostsProps) {

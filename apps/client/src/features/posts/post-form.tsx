@@ -13,7 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { PostFormSchema } from '@post-app/validation';
-import type { PostFormType, PostType } from '@post-app/validation';
+import type { TPostForm, TPost } from '@post-app/validation';
 import { trpc } from '@/lib/trpc';
 
 type PostFormProps =
@@ -24,12 +24,12 @@ type PostFormProps =
     }
   | {
       mode: 'edit';
-      postValues: PostType;
+      postValues: TPost;
       closeDialog: () => void;
     };
 
 export default function PostForm({ mode, closeDialog, postValues }: PostFormProps) {
-  const form = useForm<PostFormType>({
+  const form = useForm<TPostForm>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
       username: postValues?.username || '',
@@ -50,7 +50,7 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
 
   const { isPending, isError, error } = mode === 'create' ? createMutation : updateMutation;
 
-  const onSubmit = async (postData: PostFormType) => {
+  const onSubmit = async (postData: TPostForm) => {
     if (mode === 'create') await createMutation.mutateAsync(postData);
     if (mode === 'edit')
       await updateMutation.mutateAsync({

@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { PostType } from '@post-app/validation';
+import type { TPost } from '@post-app/validation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -7,7 +7,7 @@ import { PostDialog, DeletePostDialog } from './';
 import Feedback from './feedback';
 
 type PostProps = {
-  post: PostType;
+  post: TPost;
 };
 
 const MAX_LENGTH = 400;

@@ -4,8 +4,29 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { httpBatchLink } from '@trpc/client';
 import { trpc } from './lib/trpc';
 import { useState } from 'react';
-import NavBar from './components/navbar';
 import Home from './pages/home';
+import ErrorPage from './pages/error-page';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import SharedLayout from './components/shared-layout';
+import Auth from './pages/auth';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <SharedLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        element: <Home />,
+        index: true,
+      },
+      {
+        path: '/auth/*',
+        element: <Auth />,
+      },
+    ],
+  },
+]);
 
 function App() {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,7 +35,12 @@ function App() {
       links: [
         httpBatchLink({
           url: 'http://localhost:5000/trpc',
-          // You can pass any HTTP headers you wish here
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
+          },
         }),
       ],
     }),
@@ -24,10 +50,7 @@ function App() {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-          <div className="mx-auto min-h-dvh px-0 lg:container">
-            <NavBar />
-            <Home />
-          </div>
+          <RouterProvider router={router} />
         </ThemeProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
