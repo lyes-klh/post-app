@@ -43,14 +43,16 @@ export default function Home() {
               </React.Fragment>
             ))}
 
-            <Button
-              className="mt-4"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage || !hasNextPage}
-            >
-              {isFetchingNextPage && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
-              Load More
-            </Button>
+            {hasNextPage && (
+              <Button
+                className="mt-4"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage || !hasNextPage}
+              >
+                {isFetchingNextPage && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+                Load More
+              </Button>
+            )}
           </>
         )}
       </main>

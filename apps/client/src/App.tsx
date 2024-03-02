@@ -8,6 +8,7 @@ import ErrorPage from './pages/error-page';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import SharedLayout from './components/shared-layout';
 import Auth from './pages/auth';
+import ViewPost from './pages/view-post';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: '/auth/*',
         element: <Auth />,
+      },
+      {
+        path: '/posts/:id',
+        element: <ViewPost />,
       },
     ],
   },

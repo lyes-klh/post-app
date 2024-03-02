@@ -13,7 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { trpc } from '@/lib/trpc';
-import type { Post as TPost } from '@post-app/database';
+import type { TPost } from '@/lib/trpc';
 import { PostFormSchema } from '@post-app/validation';
 import type { TPostForm } from '@post-app/validation';
 
@@ -87,7 +87,7 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
               <FormControl>
                 <Textarea
                   placeholder="Write something..."
-                  className="h-24 resize-none"
+                  className="h-32 resize-none"
                   {...field}
                 />
               </FormControl>

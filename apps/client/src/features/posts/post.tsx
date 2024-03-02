@@ -5,33 +5,31 @@ import { useState } from 'react';
 import { PostDialog, DeletePostDialog } from './';
 import Feedback from './feedback';
 import { TPost, trpc } from '@/lib/trpc';
+import { Link } from 'react-router-dom';
+import { truncateString } from '@/lib/utils';
 
 type PostProps = {
   post: TPost;
+  viewMode?: boolean;
 };
 
 const MAX_LENGTH = 400;
-
-const truncateString = (str: string, maxLength: number = MAX_LENGTH): string => {
-  if (str.length > maxLength) {
-    return str.substring(0, maxLength) + '...';
-  }
-  return str;
-};
 
 function Content({ content }: { content: string }) {
   return <p className="break-words">{content}</p>;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post, viewMode }: PostProps) {
   const {
+    id,
     title,
     content,
     user: { username },
     createdAt,
   } = post;
-  const preview = truncateString(content);
-  const isTruncated = content.length > MAX_LENGTH;
+
+  const [preview] = useState(() => truncateString(content, MAX_LENGTH));
+  const [isTruncated] = useState(content.length > MAX_LENGTH);
   const [isOpen, setIsOpen] = useState(false);
 
   const utils = trpc.useUtils();
@@ -48,9 +46,11 @@ export default function Post({ post }: PostProps) {
           </Avatar>
           <div className="flex flex-col gap-1">
             <p className="text-sm font-medium">{username}</p>
-            <p className="text-secondary-foreground text-xs font-light">
-              {new Date(createdAt).toLocaleString()}
-            </p>
+            <Link to={`/posts/${id}`}>
+              <p className="text-muted-foreground text-xs font-light">
+                {new Date(createdAt).toLocaleString()}
+              </p>
+            </Link>
           </div>
         </div>
         {currentUser?.id === post.userId && (
@@ -79,7 +79,13 @@ export default function Post({ post }: PostProps) {
         )}
       </>
 
-      <Feedback likesCount={post.likesCount} liked={post.likes.length > 0} postId={post.id} />
+      <Feedback
+        likesCount={post.likesCount}
+        commentsCount={post.commentsCount}
+        liked={post.likes.length > 0}
+        postId={post.id}
+        viewMode={viewMode}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import { passport } from '../../passport';
 import { prisma } from '@/lib/db';
 import { Prisma, User } from '@post-app/database';
+import { feedbackRouter } from './feedback';
 
 export const userSelect = {
   id: true,

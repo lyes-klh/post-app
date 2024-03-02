@@ -15,8 +15,6 @@ export default function NavBar() {
   });
   const { data: user } = trpc.users.me.useQuery(undefined, { retry: false });
 
-  // const user = utils.users.me.getData();
-
   const handleLogout = async () => {
     await mutateAsync();
     navigate('/auth/login');
@@ -38,11 +36,10 @@ export default function NavBar() {
 
         {user && (
           <>
+            <PostDialog mode="create" />
             <Button onClick={handleLogout} variant="secondary">
               Logout
             </Button>
-
-            <PostDialog mode="create" />
           </>
         )}
 

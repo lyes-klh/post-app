@@ -10,7 +10,7 @@ import {
 import PostForm from '@/features/posts/post-form';
 import { useState } from 'react';
 import { PlusIcon, Pencil2Icon } from '@radix-ui/react-icons';
-import { TPost } from '@post-app/validation';
+import { TPost } from '@/lib/trpc';
 
 type PostDialogProps =
   | {

@@ -13,20 +13,22 @@ import { trpc } from '@/lib/trpc';
 import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 
-type DeletePostDialogProps = {
+type DeleteCommentDialogProps = {
+  commentId: string;
   postId: string;
 };
 
-export function DeletePostDialog({ postId }: DeletePostDialogProps) {
+export default function DeleteCommentDialog({ commentId, postId }: DeleteCommentDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const utils = trpc.useUtils();
 
-  const { mutateAsync, isPending, isError, error } = trpc.posts.delete.useMutation({
-    onSuccess: () => utils.posts.getAll.invalidate(),
-  });
+  const { mutateAsync, isPending, isError, error } =
+    trpc.posts.feedback.comments.delete.useMutation({
+      onSuccess: () => utils.posts.feedback.comments.getAll.invalidate({ postId: postId }),
+    });
 
   const handleClick = async () => {
-    await mutateAsync({ postId });
+    await mutateAsync({ commentId });
     setIsOpen(false);
   };
 
@@ -34,18 +36,18 @@ export function DeletePostDialog({ postId }: DeletePostDialogProps) {
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          variant="ghost"
+          variant="link"
           size="icon"
-          className="hover:text-destructive dark:hover:text-destructive"
+          className="hover:text-destructive dark:hover:text-destructive text-muted-foreground"
         >
           <TrashIcon className="h-5 w-5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-[425px]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Post</AlertDialogTitle>
+          <AlertDialogTitle>Delete Comment</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the post.
+            This action cannot be undone. This will permanently delete the comment.
             {isError && (
               <p className="text-destructive">
                 {error.data?.code} {error.message}

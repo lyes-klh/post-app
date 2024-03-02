@@ -8,3 +8,5 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type TPostList = RouterOutputs['posts']['getAll']['posts'];
 export type TPost = TPostList[number];
+export type TCommentList = RouterOutputs['posts']['feedback']['comments']['getAll']['comments'];
+export type TComment = TCommentList[number];

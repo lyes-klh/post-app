@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { PostFormSchema } from '@post-app/validation';
 import { prisma } from '@/lib/db';
 import { userSelect } from './user';
+import { feedbackRouter } from './feedback';
 
 export const postRouter = router({
   getById: protectedProcedure
@@ -12,7 +13,7 @@ export const postRouter = router({
         id: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const post = await prisma.post.findUnique({
         where: {
           id: input.id,
@@ -20,6 +21,15 @@ export const postRouter = router({
         include: {
           user: {
             select: userSelect,
+          },
+          likes: {
+            where: {
+              userId: ctx.user.id,
+            },
+            select: {
+              id: true,
+              userId: true,
+            },
           },
         },
       });
@@ -164,139 +174,5 @@ export const postRouter = router({
       });
     }),
 
-  like: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const post = await prisma.post.findUnique({
-        where: {
-          id: input.postId,
-        },
-      });
-
-      if (!post)
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Post not found',
-        });
-
-      const like = await prisma.like.findFirst({
-        where: {
-          postId: post.id,
-          userId: ctx.user.id,
-        },
-      });
-
-      if (like)
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'You already liked this post.',
-        });
-
-      await prisma.like.create({
-        data: {
-          userId: ctx.user.id,
-          postId: post.id,
-        },
-      });
-
-      await prisma.post.update({
-        where: {
-          id: post.id,
-        },
-        data: {
-          likesCount: post.likesCount + 1,
-        },
-      });
-    }),
-
-  unlike: protectedProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const post = await prisma.post.findUnique({
-        where: {
-          id: input.postId,
-        },
-      });
-
-      if (!post)
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Post not found',
-        });
-
-      const like = await prisma.like.findFirst({
-        where: {
-          postId: post.id,
-          userId: ctx.user.id,
-        },
-      });
-
-      if (!like)
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'You did not like this post.',
-        });
-
-      await prisma.like.delete({
-        where: {
-          id_postId_userId: {
-            id: like.id,
-            postId: post.id,
-            userId: ctx.user.id,
-          },
-        },
-      });
-
-      await prisma.post.update({
-        where: {
-          id: post.id,
-        },
-        data: {
-          likesCount: post.likesCount - 1,
-        },
-      });
-    }),
-
-  comment: protectedProcedure
-    .input(z.object({ postId: z.string(), content: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const post = await prisma.post.findUnique({
-        where: {
-          id: input.postId,
-        },
-      });
-
-      if (!post)
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Post not found',
-        });
-
-      const comment = await prisma.comment.create({
-        data: {
-          postId: post.id,
-          userId: ctx.user.id,
-          content: input.content,
-        },
-      });
-
-      await prisma.post.update({
-        where: {
-          id: post.id,
-        },
-        data: {
-          commentsCount: post.commentsCount + 1,
-        },
-      });
-
-      return comment;
-    }),
+  feedback: feedbackRouter,
 });
