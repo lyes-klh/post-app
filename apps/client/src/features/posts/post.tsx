@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { TPost } from '@post-app/validation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { PostDialog, DeletePostDialog } from './';
 import Feedback from './feedback';
+import { TPost, trpc } from '@/lib/trpc';
 
 type PostProps = {
   post: TPost;
@@ -24,10 +24,19 @@ function Content({ content }: { content: string }) {
 }
 
 export default function Post({ post }: PostProps) {
-  const { _id, username, title, content } = post;
+  const {
+    title,
+    content,
+    user: { username },
+    createdAt,
+  } = post;
   const preview = truncateString(content);
   const isTruncated = content.length > MAX_LENGTH;
   const [isOpen, setIsOpen] = useState(false);
+
+  const utils = trpc.useUtils();
+
+  const [currentUser] = useState(() => utils.users.me.getData());
 
   return (
     <div className="mt-4 flex w-full flex-col gap-4 rounded-lg p-4 shadow-md lg:w-2/3">
@@ -37,13 +46,19 @@ export default function Post({ post }: PostProps) {
             <AvatarImage src="" />
             <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div className="text-sm font-medium">{username}</div>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium">{username}</p>
+            <p className="text-secondary-foreground text-xs font-light">
+              {new Date(createdAt).toLocaleString()}
+            </p>
+          </div>
         </div>
-
-        <div className="flex items-center justify-center">
-          <PostDialog mode="edit" postValues={post} />
-          <DeletePostDialog id={_id} />
-        </div>
+        {currentUser?.id === post.userId && (
+          <div className="flex items-center justify-center">
+            <PostDialog mode="edit" postValues={post} />
+            <DeletePostDialog postId={post.id} />
+          </div>
+        )}
       </div>
 
       <h2 className="text-lg font-semibold">{title}</h2>
@@ -64,7 +79,7 @@ export default function Post({ post }: PostProps) {
         )}
       </>
 
-      <Feedback likesCount={post.likesCount} commentsCount={post.comments.length} id={post._id} />
+      <Feedback likesCount={post.likesCount} liked={post.likes.length > 0} postId={post.id} />
     </div>
   );
 }

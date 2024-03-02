@@ -1,7 +1,8 @@
 import passport from 'passport';
-import UserModel, { TUser } from '@/models/userModel';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/db';
+import { User } from '@post-app/database';
 
 passport.use(
   'custom',
@@ -9,16 +10,16 @@ passport.use(
     { usernameField: 'email', passwordField: 'password' },
     async (email, password, cb) => {
       try {
-        const user = await UserModel.findOne({ email }).select('+password');
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+        });
         if (!user) {
-          // return cb(new InvalidUserError('User not found'));
           return cb({ message: 'User not found' });
         }
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
-          // return cb(
-          //   new InvalidUserError(`Login failed for user ${user.username}: incorrect password`),
-          // );
           return cb({ message: `Login failed for user ${user.email}: incorrect password` });
         }
         return cb(null, user);
@@ -30,14 +31,17 @@ passport.use(
 );
 
 passport.serializeUser(function (user, cb) {
-  cb(null, (user as TUser)._id);
+  cb(null, (user as User).id);
 });
 
-passport.deserializeUser(async function (id, cb) {
+passport.deserializeUser(async function (id: string, cb) {
   try {
-    const user = await UserModel.findById(id);
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
     if (!user) {
-      // return cb(new DeserializeUserError(`Deserialize user failed: user does not exist`));
       return cb({ message: `Deserialize user failed: user does not exist` });
     }
     return cb(null, user);

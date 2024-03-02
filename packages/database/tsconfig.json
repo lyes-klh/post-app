@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "strict": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules"],
+}

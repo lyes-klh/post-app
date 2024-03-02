@@ -3,14 +3,18 @@
   "globalDotEnv": [".env"],
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^db:generate"],
       "outputs": ["dist/**"],
       "dotEnv": [".env.production.local", ".env.production", ".env.local", ".env"]
     },
     "dev": {
+      "dependsOn": ["^db:generate"],
       "cache": false,
       "persistent": true,
       "dotEnv": [".env.development.local", ".env.development", ".env.local", ".env"]
+    },
+    "db:generate": {
+      "cache": false
     }
   }
 }

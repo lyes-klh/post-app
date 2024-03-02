@@ -1,10 +1,11 @@
+import { User } from '@post-app/database';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 
-export async function createContext(opts: CreateExpressContextOptions) {
+export function createContext(opts: CreateExpressContextOptions) {
   const { req, res } = opts;
 
-  const user = req.user;
+  const user = req.user as User | undefined;
   return { user, req, res };
 }
 
@@ -20,7 +21,12 @@ export const protectedProcedure = t.procedure.use(function isAuthed(opts) {
       message: 'You are not logged in, please login to continue.',
     });
 
-  return opts.next({ ctx });
+  return opts.next({
+    ctx: {
+      ...ctx,
+      user: ctx.user,
+    },
+  });
 });
 
 export const router = t.router;

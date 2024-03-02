@@ -1,18 +1,16 @@
-import UserModel from '@/models/userModel';
 import { router, publicProcedure, protectedProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
 import { passport } from '../../passport';
-import { Types } from 'mongoose';
+import { prisma } from '@/lib/db';
+import { Prisma, User } from '@post-app/database';
 
-const userSchema = z.object({
-  _id: z.coerce.string().refine((value) => {
-    return Types.ObjectId.isValid(value);
-  }),
-  email: z.string().email(),
-  username: z.string(),
-});
+export const userSelect = {
+  id: true,
+  email: true,
+  username: true,
+} satisfies Prisma.UserSelect;
 
 export const userRouter = router({
   register: publicProcedure
@@ -25,7 +23,12 @@ export const userRouter = router({
     )
     .mutation(async (opts) => {
       const { input } = opts;
-      const user = await UserModel.findOne({ email: input.email });
+      const user = await prisma.user.findUnique({
+        where: {
+          email: input.email,
+        },
+      });
+
       if (user) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
@@ -34,12 +37,14 @@ export const userRouter = router({
       }
 
       const hashedPassword = await bcrypt.hash(input.password, 12);
-      const newUser = await UserModel.create({ ...input, password: hashedPassword });
+      const newUser = await prisma.user.create({
+        data: { ...input, password: hashedPassword },
+        select: userSelect,
+      });
 
       await new Promise((resolve) => opts.ctx.req.login(newUser, () => resolve(null)));
 
-      const userParsed = userSchema.safeParse(newUser);
-      if (userParsed.success) return userParsed.data;
+      return newUser;
     }),
 
   login: publicProcedure
@@ -54,7 +59,7 @@ export const userRouter = router({
 
       try {
         await new Promise((resolve, reject) => {
-          passport.authenticate('custom')(ctx.req, ctx.res, (err: Error, user: Express.User) => {
+          passport.authenticate('custom')(ctx.req, ctx.res, (err: Error, user: User) => {
             if (err) return reject(err);
             resolve(user);
           });
@@ -62,15 +67,19 @@ export const userRouter = router({
       } catch (err) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          // message: 'Authentication Failed',
+          // @ts-ignore
           message: err.message,
         });
       }
 
-      const user = await UserModel.findOne({ email: input.email });
+      const user = await prisma.user.findUnique({
+        where: {
+          email: input.email,
+        },
+        select: userSelect,
+      });
 
-      const userParsed = userSchema.safeParse(user);
-      if (userParsed.success) return userParsed.data;
+      if (user) return user;
       else
         throw new TRPCError({
           code: 'BAD_REQUEST',
@@ -90,12 +99,13 @@ export const userRouter = router({
   }),
 
   me: protectedProcedure.query(async (opts) => {
-    if (opts.ctx.user) {
-      const user = await UserModel.findById(opts.ctx.user?._id);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: opts.ctx.user.id,
+      },
+      select: userSelect,
+    });
 
-      const userParsed = userSchema.safeParse(user);
-      if (userParsed.success) return userParsed.data;
-      else return null;
-    } else return null;
+    return user;
   }),
 });

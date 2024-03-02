@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+  email     String    @unique
+  username  String    @unique
+  password  String
+  posts     Post[]
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Post {
+  id            String    @id @default(uuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  title         String
+  content       String
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+  likes         Like[]
+  comments      Comment[]
+  likesCount    Int       @default(0)
+  commentsCount Int       @default(0)
+}
+
+model Like {
+  id        String   @default(uuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+
+  @@id([id, postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  Post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+}

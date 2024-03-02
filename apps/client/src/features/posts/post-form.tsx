@@ -12,9 +12,10 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { PostFormSchema } from '@post-app/validation';
-import type { TPostForm, TPost } from '@post-app/validation';
 import { trpc } from '@/lib/trpc';
+import type { Post as TPost } from '@post-app/database';
+import { PostFormSchema } from '@post-app/validation';
+import type { TPostForm } from '@post-app/validation';
 
 type PostFormProps =
   | {
@@ -32,7 +33,6 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
   const form = useForm<TPostForm>({
     resolver: zodResolver(PostFormSchema),
     defaultValues: {
-      username: postValues?.username || '',
       title: postValues?.title || '',
       content: postValues?.content || '',
     },
@@ -52,30 +52,19 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
 
   const onSubmit = async (postData: TPostForm) => {
     if (mode === 'create') await createMutation.mutateAsync(postData);
+
     if (mode === 'edit')
       await updateMutation.mutateAsync({
-        id: postValues._id,
+        postId: postValues.id,
         post: postData,
       });
+
     closeDialog();
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="Username..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="title"

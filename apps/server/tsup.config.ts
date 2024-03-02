@@ -6,9 +6,9 @@ export default defineConfig({
   clean: true,
   dts: false,
   entry: ['src/index.ts'],
-  format: ['esm', 'cjs'],
+  format: ['cjs'],
   target: 'esnext',
   minify: isProduction,
   sourcemap: !isProduction,
-  noExternal: ['@post-app/validation', '@post-app/trpc'],
+  noExternal: ['@post-app/database', '@post-app/validation', '@post-app/trpc'],
 });

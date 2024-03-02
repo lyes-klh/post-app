@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { httpBatchLink } from '@trpc/client';
 import { trpc } from './lib/trpc';
-import { useState } from 'react';
 import Home from './pages/home';
 import ErrorPage from './pages/error-page';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -28,24 +27,22 @@ const router = createBrowserRouter([
   },
 ]);
 
-function App() {
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: 'http://localhost:5000/trpc',
-          fetch(url, options) {
-            return fetch(url, {
-              ...options,
-              credentials: 'include',
-            });
-          },
-        }),
-      ],
+const queryClient = new QueryClient();
+const trpcClient = trpc.createClient({
+  links: [
+    httpBatchLink({
+      url: 'http://localhost:5000/trpc',
+      fetch(url, options) {
+        return fetch(url, {
+          ...options,
+          credentials: 'include',
+        });
+      },
     }),
-  );
+  ],
+});
 
+function App() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>

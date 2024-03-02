@@ -1,72 +1,149 @@
-import Post from '@/models/postModel';
-import { router, publicProcedure, protectedProcedure } from '../trpc';
+import { router, protectedProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { PostFormSchema, TPost } from '@post-app/validation';
+import { PostFormSchema } from '@post-app/validation';
+import { prisma } from '@/lib/db';
+import { userSelect } from './user';
 
 export const postRouter = router({
-  getById: publicProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         id: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      const post = await Post.findById(input.id);
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.id,
+        },
+        include: {
+          user: {
+            select: userSelect,
+          },
+        },
+      });
+
       if (!post)
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Post not found',
         });
 
-      return post as TPost;
+      return post;
     }),
 
   getAll: protectedProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(50).nullish(),
-        cursor: z.number(),
+        cursor: z
+          .object({
+            createdAt: z.string(),
+            id: z.string(),
+          })
+          .nullish(),
       }),
     )
-    .query(async ({ input }) => {
-      const cursor = input.cursor ?? 1;
+    .query(async ({ input, ctx }) => {
       const limit = input.limit ?? 5;
+      let cursor: { id: string; createdAt: Date } | undefined = undefined;
 
-      const posts = await Post.find()
-        .sort({ createdAt: -1 })
-        .skip((cursor - 1) * limit)
-        .limit(limit);
+      if (input.cursor)
+        cursor = { id: input.cursor.id, createdAt: new Date(input.cursor.createdAt) };
 
-      return posts as TPost[];
+      const posts = await prisma.post.findMany({
+        take: limit + 1,
+        cursor,
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        include: {
+          user: {
+            select: userSelect,
+          },
+          likes: {
+            where: {
+              userId: ctx.user.id,
+            },
+            select: {
+              id: true,
+              userId: true,
+            },
+          },
+        },
+      });
+
+      let nextCursor: typeof cursor = undefined;
+
+      if (posts.length > limit) {
+        const nextItem = posts.pop();
+        nextCursor = { id: nextItem!.id, createdAt: nextItem!.createdAt };
+      }
+
+      return {
+        posts,
+        nextCursor,
+      };
     }),
 
-  create: publicProcedure.input(PostFormSchema).mutation(async ({ input }) => {
-    const post = await Post.create(input);
+  create: protectedProcedure.input(PostFormSchema).mutation(async ({ input, ctx }) => {
+    const post = await prisma.post.create({
+      data: {
+        userId: ctx.user.id,
+        ...input,
+      },
+    });
 
-    return post as TPost;
+    return post;
   }),
 
-  update: publicProcedure
+  update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        postId: z.string(),
         post: PostFormSchema.partial(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const post = await Post.findByIdAndUpdate(input.id, input.post, { new: true });
-      return post as TPost;
+    .mutation(async ({ input, ctx }) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
+
+      if (!post)
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Post not found.',
+        });
+
+      if (post.userId !== ctx.user.id)
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: "You can't update this post.",
+        });
+
+      const updatedPost = await prisma.post.update({
+        where: {
+          id: input.postId,
+        },
+        data: input.post,
+      });
+
+      return updatedPost;
     }),
 
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        postId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const post = await Post.findById(input.id);
+    .mutation(async ({ input, ctx }) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
 
       if (!post)
         throw new TRPCError({
@@ -74,17 +151,31 @@ export const postRouter = router({
           message: 'Post not found',
         });
 
-      await post.deleteOne();
+      if (post.userId !== ctx.user.id)
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: "You can't delete this post.",
+        });
+
+      await prisma.post.delete({
+        where: {
+          id: post.id,
+        },
+      });
     }),
 
-  like: publicProcedure
+  like: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        postId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const post = await Post.findById(input.id);
+    .mutation(async ({ input, ctx }) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
 
       if (!post)
         throw new TRPCError({
@@ -92,17 +183,48 @@ export const postRouter = router({
           message: 'Post not found',
         });
 
-      post.likesCount++;
+      const like = await prisma.like.findFirst({
+        where: {
+          postId: post.id,
+          userId: ctx.user.id,
+        },
+      });
 
-      const updatedPost = await post.save();
+      if (like)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'You already liked this post.',
+        });
 
-      return updatedPost as TPost;
+      await prisma.like.create({
+        data: {
+          userId: ctx.user.id,
+          postId: post.id,
+        },
+      });
+
+      await prisma.post.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          likesCount: post.likesCount + 1,
+        },
+      });
     }),
 
-  comment: publicProcedure
-    .input(z.object({ id: z.string(), comment: z.string() }))
-    .mutation(async ({ input }) => {
-      const post = await Post.findById(input.id);
+  unlike: protectedProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
 
       if (!post)
         throw new TRPCError({
@@ -110,10 +232,71 @@ export const postRouter = router({
           message: 'Post not found',
         });
 
-      post.comments.push(input.comment);
+      const like = await prisma.like.findFirst({
+        where: {
+          postId: post.id,
+          userId: ctx.user.id,
+        },
+      });
 
-      const updatedPost = await post.save();
+      if (!like)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'You did not like this post.',
+        });
 
-      return updatedPost as TPost;
+      await prisma.like.delete({
+        where: {
+          id_postId_userId: {
+            id: like.id,
+            postId: post.id,
+            userId: ctx.user.id,
+          },
+        },
+      });
+
+      await prisma.post.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          likesCount: post.likesCount - 1,
+        },
+      });
+    }),
+
+  comment: protectedProcedure
+    .input(z.object({ postId: z.string(), content: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: input.postId,
+        },
+      });
+
+      if (!post)
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Post not found',
+        });
+
+      const comment = await prisma.comment.create({
+        data: {
+          postId: post.id,
+          userId: ctx.user.id,
+          content: input.content,
+        },
+      });
+
+      await prisma.post.update({
+        where: {
+          id: post.id,
+        },
+        data: {
+          commentsCount: post.commentsCount + 1,
+        },
+      });
+
+      return comment;
     }),
 });

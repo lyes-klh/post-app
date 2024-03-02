@@ -7,13 +7,13 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const navigate = useNavigate();
+
   const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage, isError, error } =
     trpc.posts.getAll.useInfiniteQuery(
       {},
       {
-        initialCursor: 1,
-        getNextPageParam: (lastPage, _, lastPageParam) => {
-          if (lastPage.length > 0) return lastPageParam + 1;
+        getNextPageParam: (lastPage) => {
+          if (lastPage.nextCursor) return lastPage.nextCursor;
           return undefined;
         },
         retry: false,
@@ -39,7 +39,7 @@ export default function Home() {
           <>
             {data.pages.map((page, i) => (
               <React.Fragment key={i}>
-                <Posts posts={page} />
+                <Posts posts={page.posts} />
               </React.Fragment>
             ))}
 

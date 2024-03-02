@@ -14,10 +14,10 @@ import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 
 type DeletePostDialogProps = {
-  id: string;
+  postId: string;
 };
 
-export function DeletePostDialog({ id }: DeletePostDialogProps) {
+export function DeletePostDialog({ postId }: DeletePostDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const utils = trpc.useUtils();
 
@@ -26,7 +26,7 @@ export function DeletePostDialog({ id }: DeletePostDialogProps) {
   });
 
   const handleClick = async () => {
-    await mutateAsync({ id });
+    await mutateAsync({ postId });
     setIsOpen(false);
   };
 

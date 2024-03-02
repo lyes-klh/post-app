@@ -1,9 +1,8 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import session from 'express-session';
-import MongoStore from 'connect-mongo';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { appRouter, createContext } from './trpc';
 import { passport } from './passport';
@@ -24,7 +23,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Session
-// const store = MongoStore.create({ mongoUrl: process.env.DB_URL as string });
 
 app.use(
   session({

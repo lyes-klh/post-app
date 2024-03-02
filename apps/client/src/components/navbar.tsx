@@ -15,16 +15,17 @@ export default function NavBar() {
   });
   const { data: user } = trpc.users.me.useQuery(undefined, { retry: false });
 
+  // const user = utils.users.me.getData();
+
   const handleLogout = async () => {
     await mutateAsync();
-    console.log('redirecting');
     navigate('/auth/login');
   };
   return (
     <nav className="flex h-14 items-center justify-between border-b border-gray-800 p-4">
       <Link to="/">
-        <div className="flex items-center gap-2">
-          <Pencil1Icon className="h-[1.2rem] w-[1.2rem]" />
+        <div className="flex items-center justify-center gap-1">
+          <Pencil1Icon className="text-primary mt-1 h-[1.6rem] w-[1.6rem]" />
           <span className="text-xl font-bold">PostApp</span>
         </div>
       </Link>
