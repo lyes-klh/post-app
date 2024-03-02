@@ -9,6 +9,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import { trpc } from '@/lib/trpc';
 import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
@@ -19,6 +20,8 @@ type DeletePostDialogProps = {
 
 export function DeletePostDialog({ postId }: DeletePostDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+
   const utils = trpc.useUtils();
 
   const { mutateAsync, isPending, isError, error } = trpc.posts.delete.useMutation({
@@ -28,6 +31,11 @@ export function DeletePostDialog({ postId }: DeletePostDialogProps) {
   const handleClick = async () => {
     await mutateAsync({ postId });
     setIsOpen(false);
+    toast({
+      variant: 'success',
+      title: 'Post deleted',
+      description: `Your post was deleted successfully`,
+    });
   };
 
   return (

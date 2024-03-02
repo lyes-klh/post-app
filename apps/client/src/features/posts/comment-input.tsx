@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
+import { useToast } from '@/components/ui/use-toast';
 
 type CommentProps = {
   postId: string;
@@ -11,6 +12,7 @@ type CommentProps = {
 
 export default function CommentInput({ postId }: CommentProps) {
   const [content, setContent] = useState('');
+  const { toast } = useToast();
 
   const utils = trpc.useUtils();
   const [currentUser] = useState(() => utils.users.me.getData());
@@ -26,6 +28,12 @@ export default function CommentInput({ postId }: CommentProps) {
       setContent('');
       utils.posts.getAll.invalidate();
       utils.posts.feedback.comments.getAll.invalidate({ postId });
+      utils.posts.getById.invalidate({ id: postId });
+      toast({
+        variant: 'success',
+        title: 'Comment added',
+        description: 'Your comment on this post was added successfully',
+      });
     }
   };
 

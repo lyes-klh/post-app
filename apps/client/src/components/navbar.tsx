@@ -4,9 +4,11 @@ import { PostDialog } from '../features/posts';
 import { Button } from './ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
+import { useToast } from './ui/use-toast';
 
 export default function NavBar() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const utils = trpc.useUtils();
   const { mutateAsync } = trpc.users.logout.useMutation({
     onSuccess: () => {
@@ -17,6 +19,10 @@ export default function NavBar() {
 
   const handleLogout = async () => {
     await mutateAsync();
+    toast({
+      title: 'Logged out',
+      description: `You logged out from your account successfully`,
+    });
     navigate('/auth/login');
   };
   return (

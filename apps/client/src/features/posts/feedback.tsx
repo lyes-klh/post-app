@@ -5,6 +5,7 @@ import { useState } from 'react';
 import CommentInput from './comment-input';
 import Comments from './comments';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 type FeedbackProps = {
   postId: string;
@@ -22,6 +23,8 @@ export default function Feedback({
   viewMode,
 }: FeedbackProps) {
   const [isOpen, setIsOpen] = useState(!!viewMode);
+  const { toast } = useToast();
+
   const utils = trpc.useUtils();
 
   const likeQuery = trpc.posts.feedback.likes.create.useMutation();
@@ -33,6 +36,11 @@ export default function Feedback({
     await mutateAsync({ postId });
     utils.posts.getAll.invalidate();
     utils.posts.getById.invalidate({ id: postId });
+    toast({
+      variant: 'success',
+      title: liked ? 'Like deleted' : 'Liked',
+      description: liked ? 'Your like is deleted successfully' : 'You liked this post successfully',
+    });
   };
 
   return (

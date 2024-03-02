@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
+import { useToast } from '@/components/ui/use-toast';
 
 const RegisterSchema = z
   .object({
@@ -31,6 +32,7 @@ type TRegister = z.infer<typeof RegisterSchema>;
 
 export default function Register() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const form = useForm<TRegister>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -45,6 +47,11 @@ export default function Register() {
 
   const onSubmit = async (registerData: TRegister) => {
     await mutateAsync(registerData);
+    toast({
+      variant: 'success',
+      title: 'Registered',
+      description: 'Welcome to your newly created account !',
+    });
     navigate('/');
   };
 

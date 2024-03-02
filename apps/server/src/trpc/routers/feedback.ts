@@ -215,9 +215,30 @@ export const feedbackRouter = router({
             message: "You can't delete this comment.",
           });
 
+        const post = await prisma.post.findUnique({
+          where: {
+            id: comment.postId,
+          },
+        });
+
+        if (!post)
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'The post does not exist.',
+          });
+
         await prisma.comment.delete({
           where: {
             id: comment.id,
+          },
+        });
+
+        await prisma.post.update({
+          where: {
+            id: comment.postId,
+          },
+          data: {
+            commentsCount: post.commentsCount - 1,
           },
         });
       }),

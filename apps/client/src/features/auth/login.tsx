@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
+import { useToast } from '@/components/ui/use-toast';
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -23,6 +24,7 @@ const LoginSchema = z.object({
 type TLogin = z.infer<typeof LoginSchema>;
 
 export default function Login() {
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const form = useForm<TLogin>({
@@ -37,6 +39,11 @@ export default function Login() {
 
   const onSubmit = async (loginData: TLogin) => {
     await mutateAsync(loginData);
+    toast({
+      variant: 'success',
+      title: 'Logged in',
+      description: 'You logged in to your account successfully',
+    });
     navigate('/');
   };
 

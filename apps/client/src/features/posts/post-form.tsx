@@ -16,6 +16,7 @@ import { trpc } from '@/lib/trpc';
 import type { TPost } from '@/lib/trpc';
 import { PostFormSchema } from '@post-app/validation';
 import type { TPostForm } from '@post-app/validation';
+import { useToast } from '@/components/ui/use-toast';
 
 type PostFormProps =
   | {
@@ -38,6 +39,7 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
     },
   });
 
+  const { toast } = useToast();
   const utils = trpc.useUtils();
 
   const createMutation = trpc.posts.create.useMutation({
@@ -60,6 +62,11 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
       });
 
     closeDialog();
+    toast({
+      variant: 'success',
+      title: mode === 'create' ? 'Post created' : 'Post updated',
+      description: `Your post was ${mode === 'create' ? 'created' : 'updated'} successfully`,
+    });
   };
 
   return (
