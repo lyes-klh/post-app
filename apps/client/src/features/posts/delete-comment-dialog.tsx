@@ -1,3 +1,4 @@
+import ToastDescription from '@/components/toast-description';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -24,22 +25,34 @@ export default function DeleteCommentDialog({ commentId, postId }: DeleteComment
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
-  const { mutateAsync, isPending, isError, error } =
-    trpc.posts.feedback.comments.delete.useMutation({
-      onSuccess: () => {
-        utils.posts.feedback.comments.getAll.invalidate({ postId: postId });
-        utils.posts.getById.invalidate({ id: postId });
-      },
-    });
+  const { mutateAsync, isPending } = trpc.posts.feedback.comments.delete.useMutation({
+    onSuccess: () => {
+      utils.posts.feedback.comments.getAll.invalidate({ postId: postId });
+      utils.posts.getById.invalidate({ id: postId });
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">
+            Your comment was deleted successfully
+          </ToastDescription>
+        ),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
+  });
 
   const handleClick = async () => {
     await mutateAsync({ commentId });
     setIsOpen(false);
-    toast({
-      variant: 'success',
-      title: 'Comment deleted',
-      description: `Your comment on this post was deleted successfully`,
-    });
   };
 
   return (
@@ -58,11 +71,6 @@ export default function DeleteCommentDialog({ commentId, postId }: DeleteComment
           <AlertDialogTitle>Delete Comment</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the comment.
-            {isError && (
-              <p className="text-destructive">
-                {error.data?.code} {error.message}
-              </p>
-            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

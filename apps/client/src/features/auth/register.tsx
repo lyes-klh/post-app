@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
 import { useToast } from '@/components/ui/use-toast';
+import ToastDescription from '@/components/toast-description';
 
 const RegisterSchema = z
   .object({
@@ -31,6 +32,7 @@ const RegisterSchema = z
 type TRegister = z.infer<typeof RegisterSchema>;
 
 export default function Register() {
+  const utils = trpc.useUtils();
   const navigate = useNavigate();
   const { toast } = useToast();
   const form = useForm<TRegister>({
@@ -43,16 +45,21 @@ export default function Register() {
     },
   });
 
-  const { mutateAsync, isError, isPending, error } = trpc.users.register.useMutation();
+  const { mutateAsync, isError, isPending, error } = trpc.users.register.useMutation({
+    onSuccess: () => {
+      utils.users.me.invalidate();
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">Welcome to your new account !</ToastDescription>
+        ),
+      });
+      navigate('/');
+    },
+  });
 
   const onSubmit = async (registerData: TRegister) => {
     await mutateAsync(registerData);
-    toast({
-      variant: 'success',
-      title: 'Registered',
-      description: 'Welcome to your newly created account !',
-    });
-    navigate('/');
   };
 
   return (
@@ -127,11 +134,7 @@ export default function Register() {
             </Link>
           </p>
         </form>
-        {isError && (
-          <p className="text-center text-red-600">
-            {error.data?.code} {error.message}
-          </p>
-        )}
+        {isError && <p className="text-center text-red-600">{error.message}</p>}
       </Form>
     </div>
   );

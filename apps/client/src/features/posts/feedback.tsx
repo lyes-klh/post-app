@@ -6,6 +6,7 @@ import CommentInput from './comment-input';
 import Comments from './comments';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import ToastDescription from '@/components/toast-description';
 
 type FeedbackProps = {
   postId: string;
@@ -27,20 +28,53 @@ export default function Feedback({
 
   const utils = trpc.useUtils();
 
-  const likeQuery = trpc.posts.feedback.likes.create.useMutation();
-  const unlikeQuery = trpc.posts.feedback.likes.delete.useMutation();
+  const likeQuery = trpc.posts.feedback.likes.create.useMutation({
+    onSuccess: () => {
+      utils.posts.getAll.invalidate();
+      utils.posts.getById.invalidate({ id: postId });
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">You liked this post successfully</ToastDescription>
+        ),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
+  });
+  const unlikeQuery = trpc.posts.feedback.likes.delete.useMutation({
+    onSuccess: () => {
+      utils.posts.getAll.invalidate();
+      utils.posts.getById.invalidate({ id: postId });
+      toast({
+        variant: 'success',
+        description: <ToastDescription variant="success">Your like is deleted</ToastDescription>,
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
+  });
 
-  const { mutateAsync, isPending, isError, error } = liked ? unlikeQuery : likeQuery;
+  const { mutateAsync, isPending } = liked ? unlikeQuery : likeQuery;
 
   const handleLike = async () => {
     await mutateAsync({ postId });
-    utils.posts.getAll.invalidate();
-    utils.posts.getById.invalidate({ id: postId });
-    toast({
-      variant: 'success',
-      title: liked ? 'Like deleted' : 'Liked',
-      description: liked ? 'Your like is deleted successfully' : 'You liked this post successfully',
-    });
   };
 
   return (
@@ -79,11 +113,6 @@ export default function Feedback({
       </div>
       {isOpen && <CommentInput postId={postId} />}
       {viewMode && <Comments postId={postId} />}
-      {isError && (
-        <p className="text-destructive">
-          Something went wrong when trying to add feedback : {error.message}
-        </p>
-      )}
     </>
   );
 }

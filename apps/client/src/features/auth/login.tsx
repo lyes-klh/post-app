@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
 import { useToast } from '@/components/ui/use-toast';
+import ToastDescription from '@/components/toast-description';
 
 const LoginSchema = z.object({
   email: z.string().email(),
@@ -24,6 +25,7 @@ const LoginSchema = z.object({
 type TLogin = z.infer<typeof LoginSchema>;
 
 export default function Login() {
+  const utils = trpc.useUtils();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -35,16 +37,23 @@ export default function Login() {
     },
   });
 
-  const { mutateAsync, isError, error, isPending } = trpc.users.login.useMutation();
+  const { mutateAsync, isError, error, isPending } = trpc.users.login.useMutation({
+    onSuccess: () => {
+      utils.users.me.invalidate();
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">
+            You logged in to your account successfully
+          </ToastDescription>
+        ),
+      });
+      navigate('/');
+    },
+  });
 
   const onSubmit = async (loginData: TLogin) => {
     await mutateAsync(loginData);
-    toast({
-      variant: 'success',
-      title: 'Logged in',
-      description: 'You logged in to your account successfully',
-    });
-    navigate('/');
   };
 
   return (
@@ -92,11 +101,7 @@ export default function Login() {
             </Link>
           </p>
         </form>
-        {isError && (
-          <p className="text-center text-red-600">
-            {error.data?.code} {error.message}
-          </p>
-        )}
+        {isError && <p className="text-center text-red-600">{error.message}</p>}
       </Form>
     </div>
   );

@@ -17,6 +17,7 @@ import type { TPost } from '@/lib/trpc';
 import { PostFormSchema } from '@post-app/validation';
 import type { TPostForm } from '@post-app/validation';
 import { useToast } from '@/components/ui/use-toast';
+import ToastDescription from '@/components/toast-description';
 
 type PostFormProps =
   | {
@@ -43,30 +44,59 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
   const utils = trpc.useUtils();
 
   const createMutation = trpc.posts.create.useMutation({
-    onSuccess: () => utils.posts.getAll.invalidate(),
+    onSuccess: () => {
+      utils.posts.getAll.invalidate();
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">Your post was created successfully</ToastDescription>
+        ),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
   });
 
   const updateMutation = trpc.posts.update.useMutation({
-    onSuccess: () => utils.posts.getAll.invalidate(),
+    onSuccess: () => {
+      utils.posts.getAll.invalidate();
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">Your post was updated successfully</ToastDescription>
+        ),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
   });
 
-  const { isPending, isError, error } = mode === 'create' ? createMutation : updateMutation;
+  const { isPending } = mode === 'create' ? createMutation : updateMutation;
 
   const onSubmit = async (postData: TPostForm) => {
     if (mode === 'create') await createMutation.mutateAsync(postData);
-
     if (mode === 'edit')
       await updateMutation.mutateAsync({
         postId: postValues.id,
         post: postData,
       });
-
     closeDialog();
-    toast({
-      variant: 'success',
-      title: mode === 'create' ? 'Post created' : 'Post updated',
-      description: `Your post was ${mode === 'create' ? 'created' : 'updated'} successfully`,
-    });
   };
 
   return (
@@ -107,11 +137,6 @@ export default function PostForm({ mode, closeDialog, postValues }: PostFormProp
           Submit
         </Button>
       </form>
-      {isError && (
-        <p className="text-red-600">
-          {error.data?.code} {error.message}
-        </p>
-      )}
     </Form>
   );
 }

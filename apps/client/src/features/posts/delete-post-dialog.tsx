@@ -1,3 +1,4 @@
+import ToastDescription from '@/components/toast-description';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -24,18 +25,31 @@ export function DeletePostDialog({ postId }: DeletePostDialogProps) {
 
   const utils = trpc.useUtils();
 
-  const { mutateAsync, isPending, isError, error } = trpc.posts.delete.useMutation({
-    onSuccess: () => utils.posts.getAll.invalidate(),
+  const { mutateAsync, isPending } = trpc.posts.delete.useMutation({
+    onSuccess: () => {
+      utils.posts.getAll.invalidate();
+      toast({
+        variant: 'success',
+        description: (
+          <ToastDescription variant="success">Your post was deleted successfully</ToastDescription>
+        ),
+      });
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        description: (
+          <ToastDescription variant="destructive">
+            An error happened, please try again
+          </ToastDescription>
+        ),
+      });
+    },
   });
 
   const handleClick = async () => {
     await mutateAsync({ postId });
     setIsOpen(false);
-    toast({
-      variant: 'success',
-      title: 'Post deleted',
-      description: `Your post was deleted successfully`,
-    });
   };
 
   return (
@@ -54,11 +68,6 @@ export function DeletePostDialog({ postId }: DeletePostDialogProps) {
           <AlertDialogTitle>Delete Post</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the post.
-            {isError && (
-              <p className="text-destructive">
-                {error.data?.code} {error.message}
-              </p>
-            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
